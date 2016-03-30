@@ -40,7 +40,6 @@
 #include "base64.h"
 #include "sigact.h"
 #include "glob.h"
-#include "readpassphrase.h"
 #include "vis.h"
 #include "getrrsetbyname.h"
 #include "sha2.h"
@@ -72,11 +71,15 @@ int rresvport_af(int *alport, sa_family_t af);
 #ifndef HAVE_STRLCPY
 /* #include <sys/types.h> XXX Still needed? */
 size_t pamsshagentauth_strlcpy(char *dst, const char *src, size_t siz);
+#else
+#define pamsshagentauth_strlcpy strlcpy
 #endif
 
 #ifndef HAVE_STRLCAT
 /* #include <sys/types.h> XXX Still needed? */
 size_t pamsshagentauth_strlcat(char *dst, const char *src, size_t siz);
+#else
+#define pamsshagentauth_strlcat strlcat
 #endif 
 
 #ifndef HAVE_SETENV
@@ -149,6 +152,9 @@ int getpeereid(int , uid_t *, gid_t *);
 #ifndef HAVE_ARC4RANDOM
 unsigned int pamsshagentauth_arc4random(void);
 void pamsshagentauth_arc4random_stir(void);
+#else
+#define pamsshagentauth_arc4random arc4random
+#define pamsshagentauth_arc4random_stir arc4random_stir
 #endif /* !HAVE_ARC4RANDOM */
 
 #ifndef HAVE_ASPRINTF
@@ -172,6 +178,8 @@ long long strtoll(const char *, char **, int);
 
 #ifndef HAVE_STRTONUM
 long long pamsshagentauth_strtonum(const char *, long long, long long, const char **);
+#else
+#define pamsshagentauth_strtonum strtonum
 #endif
 
 #if !defined(HAVE_VASPRINTF) || !defined(HAVE_VSNPRINTF)

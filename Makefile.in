@@ -1,4 +1,28 @@
 # $Id: Makefile.in,v 1.289 2008/03/13 01:41:31 djm Exp $
+#
+# Copyright (c) 2000 Markus Friedl.  All rights reserved.
+# Modifications Copyright (c) 2008-2014 Jamie Beverly. All Rights reserved
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+# IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+# NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+# THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
 
 # uncomment if you run a non bourne compatable shell. Ie. csh
 #SHELL = @SH@
@@ -46,9 +70,9 @@ INSTALL_SSH_RAND_HELPER=@INSTALL_SSH_RAND_HELPER@
 
 PAM_MODULES=pam_ssh_agent_auth.so
 
-SSHOBJS=xmalloc.o atomicio.o authfd.o bufaux.o bufbn.o buffer.o cleanup.o entropy.o fatal.o key.o log.o misc.o secure_filename.o ssh-dss.o ssh-rsa.o uuencode.o compat.o
+SSHOBJS=xmalloc.o atomicio.o authfd.o bufaux.o bufbn.o buffer.o cleanup.o entropy.o fatal.o key.o log.o misc.o secure_filename.o ssh-dss.o ssh-rsa.o uuencode.o compat.o uidswap.o 
 
-PAM_SSH_AGENT_AUTH_OBJS=pam_user_key_allowed2.o iterate_ssh_agent_keys.o userauth_pubkey_from_id.o pam_user_authorized_keys.o
+PAM_SSH_AGENT_AUTH_OBJS=pam_user_key_allowed2.o iterate_ssh_agent_keys.o userauth_pubkey_from_id.o pam_user_authorized_keys.o get_command_line.o
 
 
 MANPAGES_IN	= pam_ssh_agent_auth.pod
@@ -76,7 +100,7 @@ pam_ssh_agent_auth.so: $(LIBCOMPAT) $(SSHOBJS) $(PAM_SSH_AGENT_AUTH_OBJS)  pam_s
 	$(LD) $(LDFLAGS_SHARED) -o $@ $(SSHOBJS) $(PAM_SSH_AGENT_AUTH_OBJS) $(LDFLAGS) -lopenbsd-compat pam_ssh_agent_auth.o $(LIBS) -lpam
 
 $(MANPAGES): $(MANPAGES_IN)
-	pod2man --section=8 --release=v0.8 --name=pam_ssh_agent_auth --official --center "PAM" pam_ssh_agent_auth.pod > pam_ssh_agent_auth.8
+	pod2man --section=8 --release=v0.10.2 --name=pam_ssh_agent_auth --official --center "PAM" pam_ssh_agent_auth.pod > pam_ssh_agent_auth.8
 
 clean:	regressclean
 	rm -f *.o *.a $(PAM_MODULES) logintest config.cache config.log

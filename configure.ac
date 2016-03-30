@@ -14,12 +14,16 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+AC_PREREQ([2.68])
 AC_INIT(OpenSSH, Portable, openssh-unix-dev@mindrot.org)
 AC_REVISION($Revision: 1.397 $)
 AC_CONFIG_SRCDIR([pam_ssh_agent_auth.c])
+AC_USE_SYSTEM_EXTENSIONS
 
-AC_CONFIG_HEADER(config.h)
+AC_CONFIG_SRCDIR([config.h.in])
+AC_CONFIG_HEADERS([config.h])
 AC_PROG_CC
+AC_C_INLINE
 AC_CANONICAL_HOST
 AC_C_BIGENDIAN
 
@@ -117,7 +121,6 @@ if test -z "$LD" ; then
 fi
 AC_SUBST(LD)
 
-AC_C_INLINE
 
 AC_CHECK_DECL(LLONG_MAX, have_llong_max=1, , [#include <limits.h>])
 
@@ -151,7 +154,7 @@ if test "$GCC" = "yes" || test "$GCC" = "egcs"; then
 		     ;;
 		2.*) no_attrib_nonnull=1 ;;
 		3.*) CFLAGS="$CFLAGS -Wsign-compare" ;;
-		4.*) CFLAGS="$CFLAGS -Wsign-compare -Wno-pointer-sign" ;;
+		4.*) CFLAGS="$CFLAGS -Wsign-compare -Wall -Wextra" ;;
 		*) ;;
 	esac
 
@@ -335,7 +338,17 @@ AC_CHECK_HEADERS( \
 	utmp.h \
 	utmpx.h \
 	vis.h \
+	time.h \
+	unistd.h \
 )
+
+AC_CHECK_FUNC(strnvis, found_strnvis=yes, found_strnvis=no)
+AS_VAR_IF([found_strnvis],[yes],
+		  [AC_MSG_CHECKING([if strnvis argument order is what we expect])
+		   AC_EGREP_HEADER([strnvis[[:space:]]*\([[:space:]]*char[[:space:]]*\*[[:space:]]*,[[:space:]]*const[[:space:]]+char[[:space:]]*\*,[[:space:]]*size_t[[:space:]]*,[[:space:]]*int[[:space:]]*\)],[vis.h],
+			[AC_MSG_RESULT([yes])],
+			[AC_MSG_RESULT([no])
+			AC_DEFINE([BROKEN_STRNVIS],[],[Define to 1 if you have the strnvis function that does accept arguments like pamsshagentauth_strnvis])])])
 
 # lastlog.h requires sys/time.h to be included first on Solaris
 AC_CHECK_HEADERS(lastlog.h, [], [], [
@@ -484,7 +497,7 @@ int main(void) { exit(0); }
 	AC_DEFINE(BROKEN_SETREGID)
 	;;
 *-*-darwin*)
-	AC_DEFINE(HAVE_BUNDLE, [], [ Define on a.out platforms which use bundles in lieu of loadable shared objects ] )
+	AC_DEFINE(HAVE_BUNDLE, 1, [Define if your system uses bundles instead of ELF shared objects])
 	AC_MSG_CHECKING(if we have working getaddrinfo)
 	AC_TRY_RUN([#include <mach-o/dyld.h>
 main() { if (NSVersionOfRunTimeLibrary("System") >= (60 << 16))
@@ -958,13 +971,18 @@ int main(int argc, char **argv) {
 	])
 ])
 
+AC_MSG_CHECKING([for /proc/pid/fd directory])
+if test -f "/proc/$$/cmdline" ; then
+	AC_DEFINE(HAVE_PROC_PID_CMDLINE, 1, [Define if you have /proc/<pid>/cmdline])
+	AC_MSG_RESULT(yes)
+else
+	AC_MSG_RESULT(no)
+fi
+
 AC_CHECK_FUNC(getspnam, ,
 	AC_CHECK_LIB(gen, getspnam, LIBS="$LIBS -lgen"))
 AC_SEARCH_LIBS(basename, gen, AC_DEFINE(HAVE_BASENAME, 1,
 	[Define if you have the basename function.]))
-
-
-
 if test "x$withval" != "xno" ; then
 	if test "x$ac_cv_header_security_pam_appl_h" != "xyes" && \
 	   test "x$ac_cv_header_pam_pam_appl_h" != "xyes" ; then
@@ -1656,11 +1674,11 @@ fi
 
 if test "x$check_for_conflicting_getspnam" = "x1"; then
 	AC_MSG_CHECKING(for conflicting getspnam in shadow.h)
-	AC_COMPILE_IFELSE(
+	AC_COMPILE_IFELSE([AC_LANG_SOURCE(
 		[
 #include <shadow.h>
 int main(void) {exit(0);}
-		],
+		])],
 		[
 			AC_MSG_RESULT(no)
 		],
@@ -2720,7 +2738,7 @@ fi
 dnl make sure we're using the real structure members and not defines
 AC_CACHE_CHECK([for msg_accrights field in struct msghdr],
 		ac_cv_have_accrights_in_msghdr, [
-	AC_COMPILE_IFELSE(
+	AC_COMPILE_IFELSE([AC_LANG_SOURCE(
 		[
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -2734,7 +2752,7 @@ struct msghdr m;
 m.msg_accrights = 0;
 exit(0);
 }
-		],
+		])],
 		[ ac_cv_have_accrights_in_msghdr="yes" ],
 		[ ac_cv_have_accrights_in_msghdr="no" ]
 	)
@@ -2747,7 +2765,7 @@ fi
 
 AC_CACHE_CHECK([for msg_control field in struct msghdr],
 		ac_cv_have_control_in_msghdr, [
-	AC_COMPILE_IFELSE(
+	AC_COMPILE_IFELSE([AC_LANG_SOURCE(
 		[
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -2761,7 +2779,7 @@ struct msghdr m;
 m.msg_control = 0;
 exit(0);
 }
-		],
+		])],
 		[ ac_cv_have_control_in_msghdr="yes" ],
 		[ ac_cv_have_control_in_msghdr="no" ]
 	)
@@ -2891,14 +2909,14 @@ AC_SEARCH_LIBS(getrrsetbyname, resolv,
 		    saved_LIBS="$LIBS"
 		    LIBS="$LIBS -lresolv"
 		    AC_MSG_CHECKING(for res_query in -lresolv)
-		    AC_LINK_IFELSE([
+		    AC_LINK_IFELSE([AC_LANG_SOURCE([
 #include <resolv.h>
 int main()
 {
 	res_query (0, 0, 0, 0, 0);
 	return 0;
 }
-			],
+			])],
 			[LIBS="$LIBS -lresolv"
 			 AC_MSG_RESULT(yes)],
 			[LIBS="$saved_LIBS"
@@ -2915,7 +2933,7 @@ int main()
 	])
 
 AC_MSG_CHECKING(if struct __res_state _res is an extern)
-AC_LINK_IFELSE([
+AC_LINK_IFELSE([AC_LANG_SOURCE([
 #include <stdio.h>
 #if HAVE_SYS_TYPES_H
 # include <sys/types.h>
@@ -2925,7 +2943,7 @@ AC_LINK_IFELSE([
 #include <resolv.h>
 extern struct __res_state _res;
 int main() { return 0; }
-		],
+		])],
 		[AC_MSG_RESULT(yes)
 		 AC_DEFINE(HAVE__RES_EXTERN, 1,
 		    [Define if you have struct __res_state _res as an extern])

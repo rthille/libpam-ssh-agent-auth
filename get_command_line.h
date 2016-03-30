@@ -1,17 +1,17 @@
 /*
- * Copyright (c) 2008, Jamie Beverly. 
+ * Copyright (c) 2014, Jamie Beverly.
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are
  * permitted provided that the following conditions are met:
- * 
+ *
  *    1. Redistributions of source code must retain the above copyright notice, this list of
  *       conditions and the following disclaimer.
- * 
+ *
  *    2. Redistributions in binary form must reproduce the above copyright notice, this list
  *       of conditions and the following disclaimer in the documentation and/or other materials
  *       provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY Jamie Beverly ``AS IS'' AND ANY EXPRESS OR IMPLIED
  * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
  * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL Jamie Beverly OR
@@ -21,18 +21,20 @@
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  * The views and conclusions contained in the software and documentation are those of the
  * authors and should not be interpreted as representing official policies, either expressed
  * or implied, of Jamie Beverly.
  */
 
+#ifndef _GET_COMMAND_LINE_H
+#define _GET_COMMAND_LINE_H
 
-#ifndef _PAM_USER_KEY_ALLOWED_H
-#define _PAM_USER_KEY_ALLOWED_H
+#include "includes.h"
 
-#include "identity.h"
-int pamsshagentauth_user_key_allowed2(struct passwd *, Key *, char *);
-int pamsshagentauth_user_key_command_allowed2(char *, char *, struct passwd *, Key *);
+size_t pamsshagentauth_get_command_line(char ***);
+void pamsshagentauth_free_command_line(char **, size_t);
+#define MAX_CMDLINE_ARGS 255
+#define MAX_LEN_PER_CMDLINE_ARG 255
 
 #endif

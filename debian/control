@@ -1,6 +1,6 @@
 Source: pam-ssh-agent-auth
 Priority: extra
-Maintainer: Alex Stapleton <alexs@prol.etari.at>
+Maintainer: Jamie Beverly <soupboy@sourceforge.net>
 Build-Depends: debhelper (>= 7), autotools-dev, libssl-dev, libpam0g-dev
 Standards-Version: 3.8.0
 Section: libs
